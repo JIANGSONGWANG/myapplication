@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.BusBlogMapper">
+    
+    <resultMap type="BusBlog" id="BusBlogResult">
+        <result property="id"    column="id"    />
+        <result property="addTime"    column="add_time"    />
+        <result property="blogName"    column="blog_name"    />
+    </resultMap>
+
+    <sql id="selectBusBlogVo">
+        select id, add_time, blog_name from bus_blog
+    </sql>
+
+    <select id="selectBlogCountByDate" parameterType="BusBlog" resultType="java.lang.String">
+    SELECT
+    add_time
+    FROM
+    bus_blog
+    <where>
+        <if test="beginDate != null">
+            AND date_format(add_time,'%y%m%d') >=  date_format(#{beginDate},'%y%m%d')
+        </if>
+        <if test="endDate != null">
+            AND date_format(#{endDate},'%y%m%d')  >=  date_format(add_time,'%y%m%d')
+        </if>
+    </where>
+    </select>
+
+    <select id="selectBusBlogList" parameterType="BusBlog" resultMap="BusBlogResult">
+        <include refid="selectBusBlogVo"/>
+        <where>  
+            <if test="addTime != null "> and add_time = #{addTime}</if>
+            <if test="blogName != null  and blogName != ''"> and blog_name like concat('%', #{blogName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectBusBlogById" parameterType="Long" resultMap="BusBlogResult">
+        <include refid="selectBusBlogVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertBusBlog" parameterType="BusBlog" useGeneratedKeys="true" keyProperty="id">
+        insert into bus_blog
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="addTime != null">add_time,</if>
+            <if test="blogName != null">blog_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="addTime != null">#{addTime},</if>
+            <if test="blogName != null">#{blogName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBusBlog" parameterType="BusBlog">
+        update bus_blog
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="addTime != null">add_time = #{addTime},</if>
+            <if test="blogName != null">blog_name = #{blogName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBusBlogById" parameterType="Long">
+        delete from bus_blog where id = #{id}
+    </delete>
+
+    <delete id="deleteBusBlogByIds" parameterType="String">
+        delete from bus_blog where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

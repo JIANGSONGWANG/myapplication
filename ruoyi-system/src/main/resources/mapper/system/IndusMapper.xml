@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.IndusMapper">
+    
+    <resultMap type="Indus" id="IndusResult">
+        <result property="ID"    column="ID"    />
+        <result property="failureType"    column="Failure_Type"    />
+        <result property="indusProbe"    column="indus_Probe"    />
+        <result property="indusUsage"    column="indus_Usage"    />
+        <result property="nodeName"    column="Node_Name"    />
+        <result property="deviceName"    column="Device_Name"    />
+        <result property="timeDate"    column="Time_Date"    />
+    </resultMap>
+
+    <sql id="selectIndusVo">
+        select ID, Failure_Type, indus_Probe, indus_Usage, Node_Name, Device_Name, Time_Date from indus_ict
+    </sql>
+
+<!--select * from indus where time >= starttime and time <= endtime-->
+    <select id="selectIndusCountByDate" parameterType="Indus" resultType="java.lang.String">
+        SELECT
+        indus_Probe
+        FROM
+        indus_ict
+        <where>
+            <if test="beginDate != null">
+                AND date_format(Time_Date,'%y%m%d') >=  date_format(#{beginDate},'%y%m%d')
+            </if>
+            <if test="endDate != null">
+                AND date_format(#{endDate},'%y%m%d')  >=  date_format(Time_Date,'%y%m%d')
+            </if>
+        </where>
+    </select>
+
+
+
+    <select id="selectIndusCountByDateByNode" parameterType="Indus" resultType="java.lang.String">
+        SELECT
+        Node_Name
+        FROM
+        indus_ict
+        <where>
+            <if test="beginDate != null">
+                AND date_format(Time_Date,'%y%m%d') >=  date_format(#{beginDate},'%y%m%d')
+            </if>
+            <if test="endDate != null">
+                AND date_format(#{endDate},'%y%m%d')  >=  date_format(Time_Date,'%y%m%d')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectIndusCountByDateByDevice" parameterType="Indus" resultType="java.lang.String">
+        SELECT
+        Device_Name
+        FROM
+        indus_ict
+        <where>
+            <if test="beginDate != null">
+                AND date_format(Time_Date,'%y%m%d') >=  date_format(#{beginDate},'%y%m%d')
+            </if>
+            <if test="endDate != null">
+                AND date_format(#{endDate},'%y%m%d')  >=  date_format(Time_Date,'%y%m%d')
+            </if>
+        </where>
+    </select>
+
+
+
+    <select id="selectIndusList" parameterType="Indus" resultMap="IndusResult">
+        <include refid="selectIndusVo"/>
+        <where>  
+            <if test="failureType != null  and failureType != ''"> and Failure_Type = #{failureType}</if>
+            <if test="indusProbe != null  and indusProbe != ''"> and indus_Probe = #{indusProbe}</if>
+            <if test="indusUsage != null "> and indus_Usage = #{indusUsage}</if>
+            <if test="nodeName != null  and nodeName != ''"> and Node_Name like concat('%', #{nodeName}, '%')</if>
+            <if test="deviceName != null  and deviceName != ''"> and Device_Name like concat('%', #{deviceName}, '%')</if>
+            <if test="timeDate != null "> and Time_Date = #{timeDate}</if>
+        </where>
+    </select>
+    
+    <select id="selectIndusByID" parameterType="Long" resultMap="IndusResult">
+        <include refid="selectIndusVo"/>
+        where ID = #{ID}
+    </select>
+        
+    <insert id="insertIndus" parameterType="Indus" useGeneratedKeys="true" keyProperty="ID">
+        insert into indus_ict
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="failureType != null and failureType != ''">Failure_Type,</if>
+            <if test="indusProbe != null and indusProbe != ''">indus_Probe,</if>
+            <if test="indusUsage != null">indus_Usage,</if>
+            <if test="nodeName != null and nodeName != ''">Node_Name,</if>
+            <if test="deviceName != null and deviceName != ''">Device_Name,</if>
+            <if test="timeDate != null">Time_Date,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="failureType != null and failureType != ''">#{failureType},</if>
+            <if test="indusProbe != null and indusProbe != ''">#{indusProbe},</if>
+            <if test="indusUsage != null">#{indusUsage},</if>
+            <if test="nodeName != null and nodeName != ''">#{nodeName},</if>
+            <if test="deviceName != null and deviceName != ''">#{deviceName},</if>
+            <if test="timeDate != null">#{timeDate},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIndus" parameterType="Indus">
+        update indus_ict
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="failureType != null and failureType != ''">Failure_Type = #{failureType},</if>
+            <if test="indusProbe != null and indusProbe != ''">indus_Probe = #{indusProbe},</if>
+            <if test="indusUsage != null">indus_Usage = #{indusUsage},</if>
+            <if test="nodeName != null and nodeName != ''">Node_Name = #{nodeName},</if>
+            <if test="deviceName != null and deviceName != ''">Device_Name = #{deviceName},</if>
+            <if test="timeDate != null">Time_Date = #{timeDate},</if>
+        </trim>
+        where ID = #{ID}
+    </update>
+
+    <delete id="deleteIndusByID" parameterType="Long">
+        delete from indus_ict where ID = #{ID}
+    </delete>
+
+    <delete id="deleteIndusByIDs" parameterType="String">
+        delete from indus_ict where ID in 
+        <foreach item="ID" collection="array" open="(" separator="," close=")">
+            #{ID}
+        </foreach>
+    </delete>
+</mapper>
